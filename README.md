@@ -10,4 +10,4 @@ This project aims to generate optimal storage schedules using Answer Set Program
 
 ## Dataset
 
-This repository contains a novel dataset for energy storage optimisation. This dataset provides a broad range of situations an optimal solution should be able to handle. It is described in detail in [Dataset.md]().
+This repository contains a novel dataset for energy storage optimisation. This dataset provides a broad range of situations an optimal solution should be able to handle. It is described in detail in [Dataset.md](Dataset.md).

@@ -29,7 +29,7 @@ The chapters below will explain the two parts in more detail
 ### Site meta data
 
 This section contains information about the site and it's equipment. Most of it is static across different days for the same site. It is still provided in each data file to make each file self-contained. The meta data contains the following fields:
-```json
+```javascript
 "site_info": 
 {
 	"site_id": 5,							// Unique identifier of the site this data was exported for
@@ -47,7 +47,7 @@ This section contains information about the site and it's equipment. Most of it 
 ## Schedule input
 
 Each day defines 48 slots of 30 minutes each. The schedule input will contain an array with 48 elements containing the information for that 30-minute slot. An example of all fields for a slot are given below:
-```json
+```javascript
 {
 	"slot_time": "2024-12-01T10:00:00.000000Z",		// Start time for this slot. End time will always be 30 minutes later
 	"price_buying": 0.187,							// Price for buying 1 kWh in this slot (Euros)
