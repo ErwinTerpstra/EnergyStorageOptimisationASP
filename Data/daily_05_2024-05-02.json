@@ -1,0 +1,399 @@
+{
+    "site_info": {
+        "site_id": 5,
+        "initial_charge": 0,
+        "battery_capacity": 245000,
+        "max_charge_amount": 15000,
+        "max_discharge_amount": 12000,
+        "charge_efficiency_from_dc": 0.98,
+        "charge_efficiency_from_ac": 0.8231999999999999,
+        "discharge_efficiency_to_dc": 0.98,
+        "discharge_efficiency_to_ac": 0.8231999999999999
+    },
+    "schedule_input": [
+        {
+            "slot_time": "2024-05-02T22:00:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2600
+        },
+        {
+            "slot_time": "2024-05-02T22:30:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2600
+        },
+        {
+            "slot_time": "2024-05-02T23:00:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-02T23:30:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T00:00:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T00:30:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T01:00:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T01:30:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T02:00:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2550
+        },
+        {
+            "slot_time": "2024-05-03T02:30:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2550
+        },
+        {
+            "slot_time": "2024-05-03T03:00:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2700
+        },
+        {
+            "slot_time": "2024-05-03T03:30:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2700
+        },
+        {
+            "slot_time": "2024-05-03T04:00:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 169.5,
+            "production_forecast_dc": 7.5,
+            "consumption_forecast": 12500
+        },
+        {
+            "slot_time": "2024-05-03T04:30:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 961.5,
+            "production_forecast_dc": 41.5,
+            "consumption_forecast": 12500
+        },
+        {
+            "slot_time": "2024-05-03T05:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 2671,
+            "production_forecast_dc": 115.5,
+            "consumption_forecast": 18000
+        },
+        {
+            "slot_time": "2024-05-03T05:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 5232.5,
+            "production_forecast_dc": 227,
+            "consumption_forecast": 18000
+        },
+        {
+            "slot_time": "2024-05-03T06:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 1534.5,
+            "production_forecast_dc": 66,
+            "consumption_forecast": 24500
+        },
+        {
+            "slot_time": "2024-05-03T06:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 2769,
+            "production_forecast_dc": 120,
+            "consumption_forecast": 24500
+        },
+        {
+            "slot_time": "2024-05-03T07:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 3751.5,
+            "production_forecast_dc": 162.5,
+            "consumption_forecast": 23500
+        },
+        {
+            "slot_time": "2024-05-03T07:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 5800.5,
+            "production_forecast_dc": 252,
+            "consumption_forecast": 23500
+        },
+        {
+            "slot_time": "2024-05-03T08:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 8216,
+            "production_forecast_dc": 357,
+            "consumption_forecast": 22000
+        },
+        {
+            "slot_time": "2024-05-03T08:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 8316.5,
+            "production_forecast_dc": 361.5,
+            "consumption_forecast": 22000
+        },
+        {
+            "slot_time": "2024-05-03T09:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 6445,
+            "production_forecast_dc": 280,
+            "consumption_forecast": 20000
+        },
+        {
+            "slot_time": "2024-05-03T09:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 6343,
+            "production_forecast_dc": 275.5,
+            "consumption_forecast": 20000
+        },
+        {
+            "slot_time": "2024-05-03T10:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 6088,
+            "production_forecast_dc": 264.5,
+            "consumption_forecast": 20500
+        },
+        {
+            "slot_time": "2024-05-03T10:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 7003.5,
+            "production_forecast_dc": 304.5,
+            "consumption_forecast": 20500
+        },
+        {
+            "slot_time": "2024-05-03T11:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 6241,
+            "production_forecast_dc": 271,
+            "consumption_forecast": 26500
+        },
+        {
+            "slot_time": "2024-05-03T11:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 7054.5,
+            "production_forecast_dc": 306.5,
+            "consumption_forecast": 26500
+        },
+        {
+            "slot_time": "2024-05-03T12:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 7244.5,
+            "production_forecast_dc": 315,
+            "consumption_forecast": 23000
+        },
+        {
+            "slot_time": "2024-05-03T12:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 5506,
+            "production_forecast_dc": 239,
+            "consumption_forecast": 23000
+        },
+        {
+            "slot_time": "2024-05-03T13:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 6990,
+            "production_forecast_dc": 303.5,
+            "consumption_forecast": 17000
+        },
+        {
+            "slot_time": "2024-05-03T13:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 7078.5,
+            "production_forecast_dc": 307.5,
+            "consumption_forecast": 17000
+        },
+        {
+            "slot_time": "2024-05-03T14:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 3512,
+            "production_forecast_dc": 152.5,
+            "consumption_forecast": 15500
+        },
+        {
+            "slot_time": "2024-05-03T14:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 2516,
+            "production_forecast_dc": 109,
+            "consumption_forecast": 15500
+        },
+        {
+            "slot_time": "2024-05-03T15:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 2853,
+            "production_forecast_dc": 123.5,
+            "consumption_forecast": 11000
+        },
+        {
+            "slot_time": "2024-05-03T15:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 2905.5,
+            "production_forecast_dc": 126,
+            "consumption_forecast": 11000
+        },
+        {
+            "slot_time": "2024-05-03T16:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 2800,
+            "production_forecast_dc": 121.5,
+            "consumption_forecast": 3250
+        },
+        {
+            "slot_time": "2024-05-03T16:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 3063.5,
+            "production_forecast_dc": 133,
+            "consumption_forecast": 3250
+        },
+        {
+            "slot_time": "2024-05-03T17:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 3063.5,
+            "production_forecast_dc": 133,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T17:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 2272.5,
+            "production_forecast_dc": 98.5,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T18:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 1098.5,
+            "production_forecast_dc": 47.5,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T18:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 318,
+            "production_forecast_dc": 13.5,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T19:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T19:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T20:00:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T20:30:00.000000Z",
+            "price_buying": 0.187,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2650
+        },
+        {
+            "slot_time": "2024-05-03T21:00:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2600
+        },
+        {
+            "slot_time": "2024-05-03T21:30:00.000000Z",
+            "price_buying": 0.1414,
+            "price_selling": 0.0438,
+            "production_forecast_ac": 0,
+            "production_forecast_dc": 0,
+            "consumption_forecast": 2600
+        }
+    ]
+}
