@@ -10,12 +10,22 @@
 
 #const initial_soc = 0.
 
+% 
+% Expected input:
+% price(H, P): Energy price in the given hour. H is the hour and P is the price. One fact per hour
+% production(H, P): PV production in the given hour. H is the hour and P is the production. One fact per hour
+% consumption(H, C): Site power consumption in the given hour. H is the hour and C is the consumption. One fact per hour
+%
+% Expected parameters:
+% 'hours': Number of hours in the schedule. Should match the number of facts defined for price/2, production/2 and consumption/2
+%
+
 % All hours in the schedule
 hour(1..hours).
 
 % Possible SoC values. The domain is much bigger than what is valid for the battery, but we need to cover some range
 % of values to be able to perform arithmetic on them and afterwards clamp to valid values
-soc_val(-(battery_capacity*100)..(battery_capacity*100)).
+soc_val(-(battery_capacity*10)..(battery_capacity*10)).
 
 % Supported commands
 command(charge; discharge; idle).
@@ -81,18 +91,26 @@ grid_usage(H, V) :-
     S <= Sp,
     V = (S - Sp) * discharge_efficiency / 100.
 
-% Profit per hour: -price * grid_usage
-profit(H, V) :-
+% Constraint to grid usage of zero, but command is not idle
+% This helps prevent random 'charge' commands when battery is full, or 'discharge' when battery is empty
+:- hour(H),
+    grid_usage(H, 0),
+    not schedule(H, idle).
+
+% Cost per hour: price * (grid_usage + site_consumption - pv_production)
+cost(H, V) :-
     price(H, P),
     grid_usage(H, U),
-    V = P * -U.
+    consumption(H, C),
+    production(H, PV),
+    V = P * (U + C - PV).
 
-% Maximize total profit (sum of per-hour nets)
-#maximize { V : profit(H, V) }.
+% Minimize total cost
+#minimize { V : cost(H, V) }.
 
 % Show schedule and soc for each hour
 #show schedule/2.
-#show soc/2.
 #show price/2.
-#show profit/2.
+#show cost/2.
+#show soc/2.
 #show grid_usage/2.

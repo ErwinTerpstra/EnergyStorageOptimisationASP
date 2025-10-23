@@ -1,5 +1,8 @@
 import json
+import math
 import clingo
+from datetime import datetime
+from itertools import batched
 
 DATA_FILE = './Data/daily_01_2024-07-05.json'
 SCHEDULER_SOURCE = './Source/schedule_discrete.lp'
@@ -31,22 +34,36 @@ def print_model(model):
 
 # Function that prints model summary to track optimization process
 def summarize_model(model):
-	print(f'Found model #{model.number} with cost {model.cost}; Optimal: {model.optimality_proven}')
+	print(f'[{datetime.now().strftime("%H:%M:%S")}] Found model #{model.number} with cost {model.cost}; Optimal: {model.optimality_proven}')
 
 # Add in facts from data file
+#
 # Note that we just generate ASP code to pass to Clingo. It should be possible to pass symbolic constructs
 # instead to prevent the string format/parse pass, but the API for that is a bit finicky. So this works as well.
+#
+# Also note that we are enumerating two slots in a batch. This is to convert from 30 minute slots to 1 hour slots.
+# This is to reduce computational complexity.
 program_input = ''
-for (hour, slot_input) in enumerate(data['schedule_input']):
-	# Only one slot per hour for now to reduce complexity
-	if hour % 2 == 0:
-		continue
+for (hour, (slot_a, slot_b)) in enumerate(batched(data['schedule_input'], n=2)):
+	# Average price between slots, in tenth of cents
+	price = slot_a['price_buying'] * 500 + slot_b['price_buying'] * 500
 
-	price = round(slot_input['price_buying'] * 1000)
-	fact = f'price({(hour // 2) + 1}, {price}).\n'
-	program_input += fact
+	# Production and consumption are in Wh, not in W. So we use the sum
+	production_ac = slot_a["production_forecast_ac"] + slot_b["production_forecast_ac"]
+	production_dc = slot_a["production_forecast_dc"] + slot_b["production_forecast_dc"]
+	consumption = slot_a["consumption_forecast"] + slot_b["consumption_forecast"]
 
-ctl = clingo.Control()
+	program_input += f'price({hour}, {round(price)}).\n'
+	program_input += f'production({hour}, {round(production_ac + production_dc)}).\n'
+	program_input += f'consumption({hour}, {round(consumption)}).\n'
+
+#hours = math.ceil(len(data['schedule_input']) / 2)
+hours = 12
+ctl = clingo.Control([ '-c', f'hours={hours}'])
+
+print(f'Composite input:')
+print(program_input)
+print()
 
 # Construct the model from base program + input
 print(f'Constructing model...')
@@ -55,7 +72,7 @@ ctl.add("base", [], scheduler_program)
 
 # Ground the model
 print(f'Grounding model...')
-ctl.ground([("input", []), ("base", [])])
+ctl.ground([("input", []), ("base", [ ])])
 
 # And solve it
 print(f'Starting solve...')
