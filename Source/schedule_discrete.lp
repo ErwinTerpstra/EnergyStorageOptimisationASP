@@ -23,10 +23,6 @@
 % All hours in the schedule
 hour(1..hours).
 
-% Possible SoC values. The domain is much bigger than what is valid for the battery, but we need to cover some range
-% of values to be able to perform arithmetic on them and afterwards clamp to valid values
-soc_val(-(battery_capacity*10)..(battery_capacity*10)).
-
 % Supported commands
 command(charge; discharge; idle).
 
@@ -41,14 +37,9 @@ command(charge; discharge; idle).
 % STATE-OF-CHARGE PROPAGATION
 %
 
-% Util to clamp soc between 0 and battery_capacity
-soc_clamp(I, I) :- soc_val(I), I >= 0, I <= battery_capacity.
-soc_clamp(I, battery_capacity) :- soc_val(I), I > battery_capacity.
-soc_clamp(I, 0) :- soc_val(I), I < 0.
-
 % soc(Hour, Value): State-of-charge at the *end* of the hour
 
-% initial SoC
+% Initial SoC
 soc(0, initial_soc).
 
 % Charge: soc(H) = min(soc(H-1) + max_charge_rate, battery_capacity)
@@ -56,14 +47,14 @@ soc(H, S) :-
     hour(H), H > 0,
     soc(H-1, Sp),
     schedule(H, charge),
-    soc_clamp(Sp + max_charge_increase, S).
+    S = @min(Sp + max_charge_increase, battery_capacity).
 
 % Discharge: soc(H) = max(soc(H-1) - max_discharge_rate, 0)
 soc(H, S) :-
     hour(H), H > 0,
     soc(H-1, Sp),
     schedule(H, discharge),
-    soc_clamp(Sp - max_charge_decrease, S).
+    S = @max(Sp - max_charge_decrease, 0).
 
 % Idle: soc(H) = soc(H-1)
 soc(H, Sp) :-

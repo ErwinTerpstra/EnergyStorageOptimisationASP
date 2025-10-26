@@ -7,6 +7,17 @@ from itertools import batched
 DATA_FILE = './Data/daily_01_2024-07-05.json'
 SCHEDULER_SOURCE = './Source/schedule_discrete.lp'
 
+# This context class allows defining utility methods in Python to be called in the ASP code
+class Context:
+	def clamp(self, x, lower, upper):
+		return min(max(x, lower), upper)
+	
+	def max(self, a, b):
+		return max(a, b)
+	
+	def min(self, a, b):
+		return min(a, b)
+
 # Read model inputs from data file
 with open(DATA_FILE) as f:
 	data = json.load(f)
@@ -53,13 +64,14 @@ for (hour, (slot_a, slot_b)) in enumerate(batched(data['schedule_input'], n=2)):
 	production_dc = slot_a["production_forecast_dc"] + slot_b["production_forecast_dc"]
 	consumption = slot_a["consumption_forecast"] + slot_b["consumption_forecast"]
 
+	# Output all the atoms as string values in the ASP language
 	program_input += f'price({hour}, {round(price)}).\n'
 	program_input += f'production({hour}, {round(production_ac + production_dc)}).\n'
 	program_input += f'consumption({hour}, {round(consumption)}).\n'
 
-#hours = math.ceil(len(data['schedule_input']) / 2)
-hours = 12
-ctl = clingo.Control([ '-c', f'hours={hours}'])
+hours = math.ceil(len(data['schedule_input']) / 2)
+hours = 14
+ctl = clingo.Control([ '--stats', '-c', f'hours={hours}', '--parallel-mode', '4'])
 
 print(f'Composite input:')
 print(program_input)
@@ -72,10 +84,15 @@ ctl.add("base", [], scheduler_program)
 
 # Ground the model
 print(f'Grounding model...')
-ctl.ground([("input", []), ("base", [ ])])
+ctl.ground([("input", []), ("base", [ ])], context=Context())
 
 # And solve it
 print(f'Starting solve...')
 result = ctl.solve(on_model=summarize_model, on_last=print_model)
 
 print(f'Solving result: {result}')
+print('Stats:')
+print(f'Atoms: {ctl.statistics['problem']['lp']['atoms']}')
+print(f'Rules: {ctl.statistics['problem']['lp']['rules']}')
+print(f'Choices: {ctl.statistics['solving']['solvers']['choices']}')
+print(f'Total time: {ctl.statistics['summary']['times']['total']:.2f}s')
