@@ -1,10 +1,11 @@
 % Parameters
-#const hours = 24.
-#const battery_capacity = 100.
-#const max_charge_rate = 30.
-#const max_discharge_rate = 30.
-#const charge_efficiency = 80.
-#const discharge_efficiency = 80.
+#const hours = 24.                  % Number of hours in the schedule, should match the numer of facts for price, consumption, etc
+#const battery_capacity = 100.      % Default capacity set to 100 to express SoC in percentages
+#const max_charge_rate = 30.        % Maximum charge rate as percentage of max soc
+#const max_discharge_rate = 30.     % Maximum discharge rate as percentage of max soc
+#const charge_efficiency = 80.      % Efficiency of charging the battery from the grid (percentage)
+#const discharge_efficiency = 80.   % Efficiency of converting battery charge to grid current (percentage)
+
 #const max_charge_increase = max_charge_rate * 100 / charge_efficiency.
 #const max_charge_decrease = max_discharge_rate * discharge_efficiency / 100.
 

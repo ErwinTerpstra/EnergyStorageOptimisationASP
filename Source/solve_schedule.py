@@ -55,23 +55,48 @@ def summarize_model(model):
 # Also note that we are enumerating two slots in a batch. This is to convert from 30 minute slots to 1 hour slots.
 # This is to reduce computational complexity.
 program_input = ''
-for (hour, (slot_a, slot_b)) in enumerate(batched(data['schedule_input'], n=2)):
+batch_count = 4
+for (hour, slots) in enumerate(batched(data['schedule_input'], n=batch_count)):
+	slot_count = len(slots)
+
 	# Average price between slots, in tenth of cents
-	price = slot_a['price_buying'] * 500 + slot_b['price_buying'] * 500
+	price = sum((slot['price_buying'] * 1000 for slot in slots)) / slot_count
 
 	# Production and consumption are in Wh, not in W. So we use the sum
-	production_ac = slot_a["production_forecast_ac"] + slot_b["production_forecast_ac"]
-	production_dc = slot_a["production_forecast_dc"] + slot_b["production_forecast_dc"]
-	consumption = slot_a["consumption_forecast"] + slot_b["consumption_forecast"]
+	production_ac = sum((slot['production_forecast_ac'] for slot in slots))
+	production_dc = sum((slot['production_forecast_dc'] for slot in slots))
+	consumption = sum((slot['consumption_forecast'] for slot in slots))
 
 	# Output all the atoms as string values in the ASP language
-	program_input += f'price({hour}, {round(price)}).\n'
-	program_input += f'production({hour}, {round(production_ac + production_dc)}).\n'
-	program_input += f'consumption({hour}, {round(consumption)}).\n'
+	program_input += f'price({hour + 1}, {round(price)}).\n'
+	program_input += f'production({hour + 1}, {round(production_ac + production_dc)}).\n'
+	program_input += f'consumption({hour + 1}, {round(consumption)}).\n'
 
-hours = math.ceil(len(data['schedule_input']) / 2)
-hours = 14
-ctl = clingo.Control([ '--stats', '-c', f'hours={hours}', '--parallel-mode', '4'])
+hours = math.ceil(len(data['schedule_input']) / batch_count)
+
+# Put all the constants we want to input in a dict for easy mapping to strings
+site = data['site_info']
+constants = \
+{
+	'hours': hours,
+	'max_charge_rate': site['max_charge_amount'] * batch_count * 100 / site['battery_capacity'],
+	'max_discharge_rate': site['max_discharge_amount'] * batch_count * 100 / site['battery_capacity'],
+	'charge_efficiency': site['charge_efficiency_from_ac'] * 100,
+	'discharge_efficiency': site['discharge_efficiency_to_ac'] * 100,
+}
+
+# Construct command-line parameters as a list of strings
+parameters = \
+[ 
+	# Extra parameters for Clingo
+	'--stats', 
+	'--parallel-mode', '4',
+
+	# Create -c flag and key=value format for each constant
+	*[ s for (key, value) in constants.items() for s in [ '-c', f'{key}={round(value)}' ] ],
+]
+
+ctl = clingo.Control(parameters)
 
 print(f'Composite input:')
 print(program_input)
