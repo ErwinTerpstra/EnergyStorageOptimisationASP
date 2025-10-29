@@ -63,8 +63,11 @@ soc(H, Sp) :-
     soc(H-1, Sp),
     schedule(H, idle).
 
-% Constraint: a valid soc value for each hour
+% Closed world assumptions must have values for all hours
 :- hour(H), H > 0, not soc(H, _).
+:- hour(H), H > 0, not price(H, _).
+:- hour(H), H > 0, not production(H, _).
+:- hour(H), H > 0, not consumption(H, _).
 
 % 
 % PROFIT CALCULATION
