@@ -63,8 +63,22 @@ soc(H, Sp) :-
     soc(H-1, Sp),
     schedule(H, idle).
 
-% Constraint: a valid soc value for each hour
+% Closed world assumptions must have values for all hours
 :- hour(H), H > 0, not soc(H, _).
+:- hour(H), H > 0, not price(H, _).
+:- hour(H), H > 0, not production(H, _).
+:- hour(H), H > 0, not consumption(H, _).
+:- soc(H, V1), soc(H, V2), V1 != V2.
+:- soc(H, S), S < 0.
+:- soc(H, S), S > battery_capacity.
+:- hour(H), not grid_usage(H, _).
+
+% Action Constraints
+:- hour(H), soc(H-1, S), S >= battery_capacity, schedule(H, charge).
+:- hour(H), soc(H-1, S), S <= 0, schedule(H, discharge).
+:- hour(H), soc(H-1, S1), soc(H, S2), schedule(H, charge), S2 - S1 > max_charge_increase.
+:- hour(H), soc(H-1, S1), soc(H, S2), schedule(H, discharge), S1 - S2 > max_charge_decrease.
+
 
 % 
 % PROFIT CALCULATION
