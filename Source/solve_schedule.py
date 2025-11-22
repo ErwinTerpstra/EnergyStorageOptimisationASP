@@ -1,10 +1,12 @@
 import json
 import math
 import clingo
+import os
+import matplotlib.pyplot as plt
 from datetime import datetime
 from itertools import batched
 
-DATA_FILE = './Data/daily_01_2024-07-05.json'
+DATA_FILE = './Data_Extreme_Solar/daily_01_2024-01-01.json'
 SCHEDULER_SOURCE = './Source/schedule_discrete.lp'
 
 # This context class allows defining utility methods in Python to be called in the ASP code
@@ -159,8 +161,15 @@ price = [int(results["price"].get(h, 0)) for h in hours]
 cost = [int(results["cost"].get(h, 0)) for h in hours]
 schedule = [results["schedule"].get(h, "idle") for h in hours]
 
+# --- Parse date from filename ---
+filename = os.path.basename(DATA_FILE)              # e.g. "daily_01_2024-07-05.json"
+plot_date = filename.split("_")[-1].replace(".json", "")  # -> "2024-07-05"
+
 # --- Plot ---
 fig, axs = plt.subplots(4, 1, figsize=(10, 12), sharex=True)
+
+# Add a global title with the date
+fig.suptitle(f"Energy Storage Optimization Results — {plot_date}", fontsize=14, y=1.02)
 
 # 1. SoC line plot
 axs[0].plot(hours, soc, marker='o', color='blue')
@@ -184,6 +193,11 @@ axs[3].bar(hours, cost, color='red')
 axs[3].set_ylabel("Cost")
 axs[3].set_title("Cost per Hour")
 axs[3].set_xlabel("Hour")
+
+# Add hour ticks to all plots
+for ax in axs:
+    ax.set_xticks(hours)
+    ax.set_xticklabels(hours)
 
 plt.tight_layout()
 plt.show()
