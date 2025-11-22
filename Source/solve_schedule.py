@@ -121,3 +121,69 @@ print(f'Atoms: {ctl.statistics['problem']['lp']['atoms']}')
 print(f'Rules: {ctl.statistics['problem']['lp']['rules']}')
 print(f'Choices: {ctl.statistics['solving']['solvers']['choices']}')
 print(f'Total time: {ctl.statistics['summary']['times']['total']:.2f}s')
+
+import matplotlib.pyplot as plt
+# Containers for results
+results = {
+    "schedule": {},
+    "soc": {},
+    "grid_usage": {},
+    "price": {},
+    "cost": {}
+}
+
+def collect_model(model):
+    atoms = model.symbols(shown=True)
+    for atom in atoms:
+        name = atom.name
+        args = atom.arguments
+        if name in results and len(args) == 2:
+            h = int(str(args[0]))
+            v = str(args[1])
+            if v.lstrip('-').isdigit():
+                v = int(v)
+            results[name][h] = v
+
+# Run solver with this callback
+ctl.solve(on_last=collect_model)
+
+# --- Prepare data for plotting ---
+# Collect hours from soc, skip hour 0 (initial state)
+hours = sorted(results["soc"].keys())
+hours = [h for h in hours if h > 0]
+
+# Build lists, casting to int for plotting
+soc = [int(results["soc"][h]) for h in hours]
+grid_usage = [int(results["grid_usage"].get(h, 0)) for h in hours]
+price = [int(results["price"].get(h, 0)) for h in hours]
+cost = [int(results["cost"].get(h, 0)) for h in hours]
+schedule = [results["schedule"].get(h, "idle") for h in hours]
+
+# --- Plot ---
+fig, axs = plt.subplots(4, 1, figsize=(10, 12), sharex=True)
+
+# 1. SoC line plot
+axs[0].plot(hours, soc, marker='o', color='blue')
+axs[0].set_ylabel("SoC (%)")
+axs[0].set_title("Battery State of Charge")
+for h, action in zip(hours, schedule):
+    axs[0].text(h, soc[hours.index(h)] + 5, action, ha='center', fontsize=8)
+
+# 2. Grid usage bar plot
+axs[1].bar(hours, grid_usage, color='orange')
+axs[1].set_ylabel("Grid Usage")
+axs[1].set_title("Grid Usage per Hour")
+
+# 3. Price line plot
+axs[2].plot(hours, price, marker='o', color='green')
+axs[2].set_ylabel("Price")
+axs[2].set_title("Price per Hour")
+
+# 4. Cost bar plot
+axs[3].bar(hours, cost, color='red')
+axs[3].set_ylabel("Cost")
+axs[3].set_title("Cost per Hour")
+axs[3].set_xlabel("Hour")
+
+plt.tight_layout()
+plt.show()
