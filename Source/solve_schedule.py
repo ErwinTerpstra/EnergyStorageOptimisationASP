@@ -161,43 +161,21 @@ price = [int(results["price"].get(h, 0)) for h in hours]
 cost = [int(results["cost"].get(h, 0)) for h in hours]
 schedule = [results["schedule"].get(h, "idle") for h in hours]
 
-# --- Parse date from filename ---
-filename = os.path.basename(DATA_FILE)              # e.g. "daily_01_2024-07-05.json"
-plot_date = filename.split("_")[-1].replace(".json", "")  # -> "2024-07-05"
-
-# --- Plot ---
-fig, axs = plt.subplots(4, 1, figsize=(10, 12), sharex=True)
-
-# Add a global title with the date
-fig.suptitle(f"Energy Storage Optimization Results — {plot_date}", fontsize=14, y=1.02)
-
-# 1. SoC line plot
-axs[0].plot(hours, soc, marker='o', color='blue')
-axs[0].set_ylabel("SoC (%)")
-axs[0].set_title("Battery State of Charge")
-for h, action in zip(hours, schedule):
-    axs[0].text(h, soc[hours.index(h)] + 5, action, ha='center', fontsize=8)
-
-# 2. Grid usage bar plot
-axs[1].bar(hours, grid_usage, color='orange')
-axs[1].set_ylabel("Grid Usage")
-axs[1].set_title("Grid Usage per Hour")
-
-# 3. Price line plot
-axs[2].plot(hours, price, marker='o', color='green')
-axs[2].set_ylabel("Price")
-axs[2].set_title("Price per Hour")
-
-# 4. Cost bar plot
-axs[3].bar(hours, cost, color='red')
-axs[3].set_ylabel("Cost")
-axs[3].set_title("Cost per Hour")
-axs[3].set_xlabel("Hour")
+# Annotate final cumulative cost (shifted higher and more to the right)
+axs[4].text(hours[-1] + 0.2,                # move 0.2 units to the right
+            cumulative_cost_series[-1] * 1.05,  # place slightly above the last value
+            f"{cumulative_cost_series[-1]:.2f}",
+            ha='left', va='bottom', fontsize=10, color='purple')
 
 # Add hour ticks to all plots
 for ax in axs:
     ax.set_xticks(hours)
     ax.set_xticklabels(hours)
+    ax.tick_params(labelbottom=True)  # <-- force labels to show on all subplots
 
 plt.tight_layout()
 plt.show()
+
+# --- Print total cumulative cost ---
+total_cost = cumulative_cost_series[-1]
+print(f"Total Cumulative Cost: {total_cost:.2f}")
