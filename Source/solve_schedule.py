@@ -8,8 +8,8 @@ import numpy as np
 from datetime import datetime
 from itertools import batched
 
-DATA_FILE = '../Data_Extreme_Solar/daily_01_2024-01-01.json'
-SCHEDULER_SOURCE = '../Source/schedule_discrete.lp'
+DATA_FILE = './Data_Extreme_Solar/daily_01_2024-01-01.json'
+SCHEDULER_SOURCE = './Source/schedule_discrete.lp'
 
 # This context class allows defining utility methods in Python to be called in the ASP code
 class Context:
