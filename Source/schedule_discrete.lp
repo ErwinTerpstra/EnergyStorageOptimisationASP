@@ -1,3 +1,16 @@
+% ------------------------------------------------------------
+% Parameters/input
+%
+% Expected input:
+% price(H, P): Energy price in the given hour. H is the hour and P is the price. One fact per hour
+% production(H, P): PV production in the given hour. H is the hour and P is the production. One fact per hour
+% consumption(H, C): Site power consumption in the given hour. H is the hour and C is the consumption. One fact per hour
+%
+% Expected parameters:
+% 'hours': Number of hours in the schedule. Should match the number of facts defined for price/2, production/2 and consumption/2
+% 'inital_soc': State-of-charge at start of the schedule (default 0)
+% ------------------------------------------------------------
+
 % Parameters
 #const hours = 24.                  % Number of hours in the schedule, should match the numer of facts for price, consumption, etc
 #const battery_capacity = 100.      % Default capacity set to 100 to express SoC in percentages
@@ -6,20 +19,17 @@
 #const charge_efficiency = 80.      % Efficiency of charging the battery from the grid (percentage)
 #const discharge_efficiency = 80.   % Efficiency of converting battery charge to grid current (percentage)
 
+#const initial_soc = 0.
+
+% Deived helpers to determine the maximum charge increase/decrease per slot
 #const max_charge_increase = max_charge_rate * 100 / charge_efficiency.
 #const max_charge_decrease = max_discharge_rate * discharge_efficiency / 100.
 
-#const initial_soc = 0.
-
-% 
-% Expected input:
-% price(H, P): Energy price in the given hour. H is the hour and P is the price. One fact per hour
-% production(H, P): PV production in the given hour. H is the hour and P is the production. One fact per hour
-% consumption(H, C): Site power consumption in the given hour. H is the hour and C is the consumption. One fact per hour
-%
-% Expected parameters:
-% 'hours': Number of hours in the schedule. Should match the number of facts defined for price/2, production/2 and consumption/2
-%
+% ------------------------------------------------------------
+% Statics:
+% hour: Atoms which identify an hour in the schedule
+% command: Atoms which identifies a command the scheduler has taken for a specific schedule slot
+%------------------------------------------------------------
 
 % All hours in the schedule
 hour(1..hours).
@@ -27,96 +37,108 @@ hour(1..hours).
 % Supported commands
 command(charge; discharge; idle).
 
-%
-% SCHEDULING
-%
-
-% Choose one command for each hour
-1 { schedule(H, C) : command(C) } 1 :- hour(H).
-
-%
-% STATE-OF-CHARGE PROPAGATION
-%
-
-% soc(Hour, Value): State-of-charge at the *end* of the hour
+% ------------------------------------------------------------
+% Initial state (time 0)
+% ------------------------------------------------------------
 
 % Initial SoC
-soc(0, initial_soc).
+holds(soc(initial_soc), 0).
+
+% ------------------------------------------------------------
+% Fluents:
+% soc/1: State-of-charge at the *end* of the hour
+% grid_usage/1: The amount of grid usage (derived)
+% cost/1: The monetary cost of grid usage (derived)
+%
+% ------------------------------------------------------------
+
+% State-of-charge deterministic propagation
 
 % Charge: soc(H) = min(soc(H-1) + max_charge_rate, battery_capacity)
-soc(H, S) :-
+holds(soc(S), H) :-
     hour(H), H > 0,
-    soc(H-1, Sp),
-    schedule(H, charge),
+    holds(soc(Sp), H-1),
+    occurs(schedule(charge), H),
     S = @min(Sp + max_charge_increase, battery_capacity).
 
 % Discharge: soc(H) = max(soc(H-1) - max_discharge_rate, 0)
-soc(H, S) :-
+holds(soc(S), H):-
     hour(H), H > 0,
-    soc(H-1, Sp),
-    schedule(H, discharge),
+    holds(soc(Sp), H-1),
+    occurs(schedule(discharge), H),
     S = @max(Sp - max_charge_decrease, 0).
 
 % Idle: soc(H) = soc(H-1)
-soc(H, Sp) :-
+holds(soc(Sp), H) :-
     hour(H), H > 0,
-    soc(H-1, Sp),
-    schedule(H, idle).
-
-% Closed world assumptions must have values for all hours
-:- hour(H), H > 0, not soc(H, _).
-:- hour(H), H > 0, not price(H, _).
-:- hour(H), H > 0, not production(H, _).
-:- hour(H), H > 0, not consumption(H, _).
-:- soc(H, V1), soc(H, V2), V1 != V2.
-:- soc(H, S), S < 0.
-:- soc(H, S), S > battery_capacity.
-:- hour(H), not grid_usage(H, _).
-
-% Action Constraints
-:- hour(H), soc(H-1, S), S >= battery_capacity, schedule(H, charge).
-:- hour(H), soc(H-1, S), S <= 0, schedule(H, discharge).
-:- hour(H), soc(H-1, S1), soc(H, S2), schedule(H, charge), S2 - S1 > max_charge_increase.
-:- hour(H), soc(H-1, S1), soc(H, S2), schedule(H, discharge), S1 - S2 > max_charge_decrease.
-
-
-% 
-% PROFIT CALCULATION
-%
+    holds(soc(Sp), H),
+    occurs(schedule(idle), H).
 
 % Helper atom to determine grid usage based on delta soc
-grid_usage(H, V) :-
-    soc(H, S),
-    soc(H-1, Sp),
+holds(grid_usage(V), H) :-
+    holds(soc(S), H),
+    holds(soc(Sp), H-1),
     S > Sp,
     V = (S - Sp) * 100 / charge_efficiency.
 
-grid_usage(H, V) :-
-    soc(H, S),
-    soc(H-1, Sp),
+holds(grid_usage(V), H) :-
+    holds(soc(S), H),
+    holds(soc(Sp), H-1),
     S <= Sp,
     V = (S - Sp) * discharge_efficiency / 100.
 
-% Constraint to grid usage of zero, but command is not idle
-% This helps prevent random 'charge' commands when battery is full, or 'discharge' when battery is empty
-:- hour(H),
-    grid_usage(H, 0),
-    not schedule(H, idle).
-
 % Cost per hour: price * (grid_usage + site_consumption - pv_production)
-cost(H, V) :-
+holds(cost(V), H) :-
+    holds(grid_usage(U), H),
     price(H, P),
-    grid_usage(H, U),
     consumption(H, C),
     production(H, PV),
     V = P * (U + C - PV).
 
-% Minimize total cost
-#minimize { V : cost(H, V) }.
+% ------------------------------------------------------------
+% Action Constraints
+% ------------------------------------------------------------
 
-% Show schedule and soc for each hour
-#show schedule/2.
+% Closed world assumptions: must have values for all hours
+:- hour(H), H > 0, not holds(soc(_), H).
+:- hour(H), H > 0, not holds(price(_), H).
+:- hour(H), H > 0, not holds(production(_), H).
+:- hour(H), H > 0, not holds(consumption(_), H).
+:- hour(H), H > 0, not holds(grid_usage(_), H).
+:- holds(soc(V1), H), holds(soc(V2), H), V1 != V2.
+:- holds(soc(S), H), S < 0.
+:- holds(soc(S), H), S > battery_capacity.
+
+% Don't charge when battery is full
+:- hour(H), holds(soc(S), H), S >= battery_capacity, occurs(schedule(charge), H).
+
+% Don't discharge when battery is empty
+:- hour(H), holds(soc(S), H), S <= 0, occurs(schedule(discharge), H).
+
+% Grid usage shouldn't exceed max
+:- hour(H), holds(grid_usage(U), H), U > max_charge_increase.
+:- hour(H), holds(grid_usage(U), H), -U > max_charge_decrease.
+
+% Constraint to grid usage of zero, but command is not idle
+% This helps prevent random 'charge' commands when battery is full, or 'discharge' when battery is empty
+:- hour(H),
+    holds(grid_usage(0), H),
+    not occurs(schedule(idle), H).
+
+% ------------------------------------------------------------
+% Goal definition
+% ------------------------------------------------------------
+
+% Choose one command for each hour
+1 { occurs(schedule(C), H) : command(C) } 1 :- hour(H).
+
+% Minimize total cost
+cost_at(H, V): hour(H), holds(cost(V), H).
+#minimize { V : cost_at(H, V) }.
+
+% ------------------------------------------------------------
+% Output: Show states and actions (and price) for each hour
+% ------------------------------------------------------------
 #show price/2.
-#show cost/2.
-#show soc/2.
-#show grid_usage/2.
+#show holds/2.
+#show occurs/2.
