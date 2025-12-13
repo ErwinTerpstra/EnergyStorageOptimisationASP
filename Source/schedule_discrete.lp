@@ -14,16 +14,17 @@
 % Parameters
 #const hours = 24.                  % Number of hours in the schedule, should match the numer of facts for price, consumption, etc
 #const battery_capacity = 100.      % Default capacity set to 100 to express SoC in percentages
-#const max_charge_rate = 30.        % Maximum charge rate as percentage of max soc
-#const max_discharge_rate = 30.     % Maximum discharge rate as percentage of max soc
+#const max_charge_rate = 30.        % Maximum inverter charge rate as percentage of max soc
+#const max_discharge_rate = 30.     % Maximum inverter discharge rate as percentage of max soc
 #const charge_efficiency = 80.      % Efficiency of charging the battery from the grid (percentage)
 #const discharge_efficiency = 80.   % Efficiency of converting battery charge to grid current (percentage)
+#const charge_rate_epsilon = 1.     % Safe margin above/below max charge rate which we allow to prevent rounding error
 
 #const initial_soc = 0.
 
 % Deived helpers to determine the maximum charge increase/decrease per slot
-#const max_charge_increase = max_charge_rate * 100 / charge_efficiency.
-#const max_charge_decrease = max_discharge_rate * discharge_efficiency / 100.
+#const max_charge_increase = max_charge_rate * charge_efficiency / 100.
+#const max_charge_decrease = max_discharge_rate * 100 / discharge_efficiency.
 
 % ------------------------------------------------------------
 % Statics:
@@ -47,7 +48,7 @@ holds(soc(initial_soc), 0).
 % ------------------------------------------------------------
 % Fluents:
 % soc/1: State-of-charge at the *end* of the hour
-% grid_usage/1: The amount of grid usage (derived)
+% inverter_power/1: The amount of grid usage (derived)
 % cost/1: The monetary cost of grid usage (derived)
 %
 % ------------------------------------------------------------
@@ -71,29 +72,30 @@ holds(soc(S), H):-
 % Idle: soc(H) = soc(H-1)
 holds(soc(Sp), H) :-
     hour(H), H > 0,
-    holds(soc(Sp), H),
+    holds(soc(Sp), H-1),
     occurs(schedule(idle), H).
 
-% Helper atom to determine grid usage based on delta soc
-holds(grid_usage(V), H) :-
+% Helper atom to determine inverter power based on delta soc
+% This helps handling being at max/min soc correctly
+holds(inverter_power(V), H) :-
     holds(soc(S), H),
     holds(soc(Sp), H-1),
     S > Sp,
     V = (S - Sp) * 100 / charge_efficiency.
 
-holds(grid_usage(V), H) :-
+holds(inverter_power(V), H) :-
     holds(soc(S), H),
     holds(soc(Sp), H-1),
     S <= Sp,
     V = (S - Sp) * discharge_efficiency / 100.
 
-% Cost per hour: price * (grid_usage + site_consumption - pv_production)
+% Cost per hour: price * (inverter_power + site_consumption - pv_production)
 holds(cost(V), H) :-
-    holds(grid_usage(U), H),
+    holds(inverter_power(I), H),
     price(H, P),
     consumption(H, C),
     production(H, PV),
-    V = P * (U + C - PV).
+    V = P * (I + C - PV).
 
 % ------------------------------------------------------------
 % Action Constraints
@@ -101,11 +103,8 @@ holds(cost(V), H) :-
 
 % Closed world assumptions: must have values for all hours
 :- hour(H), H > 0, not holds(soc(_), H).
-:- hour(H), H > 0, not holds(price(_), H).
-:- hour(H), H > 0, not holds(production(_), H).
-:- hour(H), H > 0, not holds(consumption(_), H).
-:- hour(H), H > 0, not holds(grid_usage(_), H).
 :- holds(soc(V1), H), holds(soc(V2), H), V1 != V2.
+:- holds(cost(V1), H), holds(cost(V2), H), V1 != V2.
 :- holds(soc(S), H), S < 0.
 :- holds(soc(S), H), S > battery_capacity.
 
@@ -115,14 +114,15 @@ holds(cost(V), H) :-
 % Don't discharge when battery is empty
 :- hour(H), holds(soc(S), H), S <= 0, occurs(schedule(discharge), H).
 
-% Grid usage shouldn't exceed max
-:- hour(H), holds(grid_usage(U), H), U > max_charge_increase.
-:- hour(H), holds(grid_usage(U), H), -U > max_charge_decrease.
+% Inverter power shouldn't exceed max
+% Note that we add some padding here to prevent tripping over rounding errors
+:- hour(H), holds(inverter_power(I), H), I > max_charge_rate + charge_rate_epsilon.
+:- hour(H), holds(inverter_power(I), H), -I > max_discharge_rate + charge_rate_epsilon.
 
 % Constraint to grid usage of zero, but command is not idle
 % This helps prevent random 'charge' commands when battery is full, or 'discharge' when battery is empty
 :- hour(H),
-    holds(grid_usage(0), H),
+    holds(inverter_power(0), H),
     not occurs(schedule(idle), H).
 
 % ------------------------------------------------------------
@@ -133,12 +133,13 @@ holds(cost(V), H) :-
 1 { occurs(schedule(C), H) : command(C) } 1 :- hour(H).
 
 % Minimize total cost
-cost_at(H, V): hour(H), holds(cost(V), H).
-#minimize { V : cost_at(H, V) }.
+#minimize { V : holds(cost(V), H) }.
 
 % ------------------------------------------------------------
 % Output: Show states and actions (and price) for each hour
 % ------------------------------------------------------------
 #show price/2.
+#show production/2.
+#show consumption/2.
 #show holds/2.
-#show occurs/2.
+#show occurs/2. 
