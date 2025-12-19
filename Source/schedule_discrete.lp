@@ -30,10 +30,18 @@
 % Statics:
 % hour: Atoms which identify an hour in the schedule
 % command: Atoms which identifies a command the scheduler has taken for a specific schedule slot
+%
 %------------------------------------------------------------
 
-% All hours in the schedule
+% All hours in the schedule. Similar to 'steps/1'
 hour(1..hours).
+
+% Domain range for 'energy' values. These are Wh values, but are represented
+% in percentages of the total battery capacity to limit the domain size
+energy(-1000..1000).
+
+% Domain range for 'price' values. These are in tenths of cents.
+price(-100000..100000).
 
 % Supported commands
 command(charge; discharge; idle).
@@ -52,6 +60,9 @@ holds(soc(initial_soc), 0).
 % cost/1: The monetary cost of grid usage (derived)
 %
 % ------------------------------------------------------------
+fluent(defined, soc(V)) :- energy(V).
+fluent(defined, inverter_power(V)) :- energy(V).
+fluent(defined, cost(V)) :- price(V).
 
 % State-of-charge deterministic propagation
 
@@ -97,6 +108,20 @@ holds(cost(V), H) :-
     production(H, PV),
     V = P * (I + C - PV).
 
+% General Inertia Axioms
+% Disabled, as we don't have any inertial fluents
+% holds(F, I+1) :- 
+%     fluent(inertial, F),
+%     holds (F, I),
+%     not -holds(F, I +1) ,
+%     I < n.
+
+%  -holds(F, I+1) :- 
+%     fluent(inertial, F),
+%     -holds(F, I),
+%     not holds (F, I+1),
+%     I < n.
+
 % ------------------------------------------------------------
 % Action Constraints
 % ------------------------------------------------------------
@@ -126,7 +151,8 @@ holds(cost(V), H) :-
     not occurs(schedule(idle), H).
 
 % ------------------------------------------------------------
-% Goal definition
+% Goal definition: select a command for each hour 
+% and minimize total cost.
 % ------------------------------------------------------------
 
 % Choose one command for each hour
@@ -136,7 +162,7 @@ holds(cost(V), H) :-
 #minimize { V : holds(cost(V), H) }.
 
 % ------------------------------------------------------------
-% Output: Show states and actions (and price) for each hour
+% Output: Show results (fluents/actions) and inputs (price, production, consumption) for each hour
 % ------------------------------------------------------------
 #show price/2.
 #show production/2.
